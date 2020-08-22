@@ -7,8 +7,8 @@ describe('Protected endpoints', function() {
 
   const {
     testUsers,
-    testArticles,
-    testComments,
+    testThings,
+    testReviews,
   } = helpers.makeThingsFixtures()
 
   before('make knex instance', () => {
@@ -29,8 +29,8 @@ describe('Protected endpoints', function() {
     helpers.seedThingsTables(
       db,
       testUsers,
-      testArticles,
-      testComments,
+      testThings,
+      testReviews,
     )
   )
 
@@ -42,7 +42,7 @@ describe('Protected endpoints', function() {
     },
     {
       name: 'GET /api/things/:things_id/reviews',
-      path: '/api/things/1/comments',
+      path: '/api/things/1/reviews',
       method: supertest(app).get,
     },
     {
