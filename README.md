@@ -39,3 +39,5 @@ timezone = 'UTC'
 
 - Start application for development: `npm run dev`
 - Run tests: `npm test`
+- Migrate the dev database `npm run migrate` 
+- Migrate the test database `npm run migrate:test`

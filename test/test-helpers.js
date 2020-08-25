@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs')
+
 function makeUsersArray() {
   return [
     {
@@ -228,26 +230,58 @@ function cleanTables(db) {
       thingful_reviews
       RESTART IDENTITY CASCADE`
   )
+  .then(() =>
+  Promise.all([
+    trx.raw(`ALTER SEQUENCE thingful_things_id_seq minvalue 0 START WITH 1`),
+    trx.raw(`ALTER SEQUENCE thingful_users_id_seq minvalue 0 START WITH 1`),
+    trx.raw(`ALTER SEQUENCE thingful_reviews_id_seq minvalue 0 START WITH 1`),
+    trx.raw(`SELECT setval('thingful_articles_id_seq', 0)`),
+    trx.raw(`SELECT setval('thingful_users_id_seq', 0)`),
+    trx.raw(`SELECT setval('thingful_reviews_id_seq', 0)`),
+  ])
+ )
 }
 
+function seedUsers(db, users){
+  const pepperedUsers = users.map(user => ({
+    ...user,
+    password:bcrypt.hashSync(user.password, 1)
+  }))
+  return db.into('thingful_users').insert(preppedUsers)
+  .then(() => 
+  // update sequence to stay in sync 
+  db.raw(
+    `SELECT setval('thingful_users_id_seq', ?)`,
+    [users[users.length - 1].id],
+  )
+  )
+}
+
+
+
 function seedThingsTables(db, users, things, reviews=[]) {
-  return db
-    .into('thingful_users')
-    .insert(users)
-    .then(() =>
-      db
-        .into('thingful_things')
-        .insert(things)
+  // use a transaction to group the queries and auto rollback on any failure
+  return db.transaction(async trx => {
+    await seedUsers(trx, users)
+    await trx.into('thingful_things').insert(things)
+    // update the auto sequence to match the forced id values
+    await trx.raw(
+      `SELECT setval('thingful_things_id_seq', ?)`,
+      [things[things.length - 1].id],
     )
-    .then(() =>
-      reviews.length && db.into('thingful_reviews').insert(reviews)
-    )
+     // only insert comments if there are some, also update the sequence counter
+     if (comments.length) {
+      await trx.into('thingful_reviews').insert(reviews)
+      await trx.raw(
+        `SELECT setval('thingful_reviews_id_seq', ?)`,
+        [reviews[reviews.length - 1].id],
+      )
+    }
+  })
 }
 
 function seedMaliciousThing(db, user, thing) {
-  return db
-    .into('thingful_users')
-    .insert([user])
+  return seedUsers(db, [user])
     .then(() =>
       db
         .into('thingful_things')
@@ -273,4 +307,5 @@ module.exports = {
   seedThingsTables,
   seedMaliciousThing,
   makeAuthHeader,
+  seedUsers,
 }
