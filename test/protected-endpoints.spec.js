@@ -54,26 +54,29 @@ describe('Protected endpoints', function() {
 
   protectedEndpoints.forEach(endpoint => {
     describe(endpoint.name, () => {
-      it(`responds 401 'Missing basic token' when no basic token`, () => {
+      it(`responds 401 'Missing bearer token' when no bearer token`, () => {
         return endpoint.method(endpoint.path)
-          .expect(401, { error: `Missing basic token` })
+          .expect(401, { error: `Missing bearer token` })
       })
 
-      it(`responds 401 'Unauthorized request' when no credentials in token`, () => {
-        const userNoCreds = { user_name: '', password: '' }
+      it(`responds 401 'Unauthorized request' when invalid JWT secret`, () => {
+        //const userNoCreds = { user_name: '', password: '' }
+        const validUser = testUsers[0];
+        const invalidSecret = 'bad-secret';
         return endpoint.method(endpoint.path)
-          .set('Authorization', helpers.makeAuthHeader(userNoCreds))
+          .set('Authorization', helpers.makeAuthHeader(validUser, invalidSecret))
           .expect(401, { error: `Unauthorized request token or password not setup` })
       })
 
       it(`responds 401 'Unauthorized request' when invalid user`, () => {
-        const userInvalidCreds = { user_name: 'user-not', password: 'existy' }
+        //const userInvalidCreds = { user_name: 'user-not', password: 'existy' }
+        const invalidUser = { user_name: 'user-not-existy', id: 1}
         return endpoint.method(endpoint.path)
-          .set('Authorization', helpers.makeAuthHeader(userInvalidCreds))
+          .set('Authorization', helpers.makeAuthHeader(userInvalidUser))
           .expect(401, { error: `Unauthorized request user not found in database` })
       })
 
-      it(`responds 401 'Unauthorized request' when invalid password`, () => {
+      it(`responds 401 'Unauthorized request' when invalid sub in payload`, () => {
         const userInvalidPass = { user_name: testUsers[0].user_name, password: 'wrong' }
         return endpoint.method(endpoint.path)
           .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
