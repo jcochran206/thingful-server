@@ -22,12 +22,18 @@ function requireAuth(req, res, next) {
     tokenUserName
   )
     .then(user => {
-      console.log(user, 'user from database')
-      if (!user || user.password !== tokenPassword) {
-        return res.status(401).json({ error: 'Unauthorized request user not found in database' })
+      //console.log(user, 'user from database')
+      if(!user) {
+        return res.status(401).json({ errror: 'Unauthorized request'})
       }
-
-      next()
+      return AuthService.comparePasswords(tokenPassword, user.password)
+      .then(passwordsMatch => {
+        if(!passwordsMatch){
+          return res.status(401).json({error: 'unauthorized request'})
+        }
+        req.user = user
+        next()
+      })
     })
     .catch(next)
 }

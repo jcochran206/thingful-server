@@ -25,7 +25,7 @@ describe('Things Endpoints', function() {
 
   afterEach('cleanup', () => helpers.cleanTables(db))
 
-  describe(`GET /api/things`, () => {
+  describe.only(`GET /api/things`, () => {
     context(`Given no things`, () => {
       it(`responds with 200 and an empty list`, () => {
         return supertest(app)

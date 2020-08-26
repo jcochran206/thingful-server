@@ -69,7 +69,7 @@ describe('Reviews Endpoints', function() {
               expect(row.text).to.eql(newReview.text)
               expect(row.rating).to.eql(newReview.rating)
               expect(row.thing_id).to.eql(newReview.thing_id)
-              expect(row.user_id).to.eql(testUser.user_id) //newReview.user_id
+              expect(row.user_id).to.eql(testUser.id) //newReview.user_id
               const expectedDate = new Date().toLocaleString()
               const actualDate = new Date(row.date_created).toLocaleString()
               expect(actualDate).to.eql(expectedDate)
@@ -94,7 +94,7 @@ describe('Reviews Endpoints', function() {
 
         return supertest(app)
           .post('/api/reviews')
-          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(newReview)
           .expect(400, {
             error: `Missing '${field}' in request body`,

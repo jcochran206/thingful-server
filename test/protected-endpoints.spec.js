@@ -63,21 +63,21 @@ describe('Protected endpoints', function() {
         const userNoCreds = { user_name: '', password: '' }
         return endpoint.method(endpoint.path)
           .set('Authorization', helpers.makeAuthHeader(userNoCreds))
-          .expect(401, { error: `Unauthorized request` })
+          .expect(401, { error: `Unauthorized request token or password not setup` })
       })
 
       it(`responds 401 'Unauthorized request' when invalid user`, () => {
         const userInvalidCreds = { user_name: 'user-not', password: 'existy' }
         return endpoint.method(endpoint.path)
           .set('Authorization', helpers.makeAuthHeader(userInvalidCreds))
-          .expect(401, { error: `Unauthorized request` })
+          .expect(401, { error: `Unauthorized request user not found in database` })
       })
 
       it(`responds 401 'Unauthorized request' when invalid password`, () => {
         const userInvalidPass = { user_name: testUsers[0].user_name, password: 'wrong' }
         return endpoint.method(endpoint.path)
           .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
-          .expect(401, { error: `Unauthorized request` })
+          .expect(401, { error: `Unauthorized request user not found in database` })
       })
     })
   })

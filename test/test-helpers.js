@@ -230,20 +230,20 @@ function cleanTables(db) {
       thingful_reviews
       RESTART IDENTITY CASCADE`
   )
-  .then(() =>
-  Promise.all([
-    trx.raw(`ALTER SEQUENCE thingful_things_id_seq minvalue 0 START WITH 1`),
-    trx.raw(`ALTER SEQUENCE thingful_users_id_seq minvalue 0 START WITH 1`),
-    trx.raw(`ALTER SEQUENCE thingful_reviews_id_seq minvalue 0 START WITH 1`),
-    trx.raw(`SELECT setval('thingful_articles_id_seq', 0)`),
-    trx.raw(`SELECT setval('thingful_users_id_seq', 0)`),
-    trx.raw(`SELECT setval('thingful_reviews_id_seq', 0)`),
-  ])
- )
+  // .then(() =>
+  // Promise.all([
+  //   trx.raw(`ALTER SEQUENCE thingful_things_id_seq minvalue 0 START WITH 1`),
+  //   trx.raw(`ALTER SEQUENCE thingful_users_id_seq minvalue 0 START WITH 1`),
+  //   trx.raw(`ALTER SEQUENCE thingful_reviews_id_seq minvalue 0 START WITH 1`),
+  //   trx.raw(`SELECT setval('thingful_articles_id_seq', 0)`),
+  //   trx.raw(`SELECT setval('thingful_users_id_seq', 0)`),
+  //   trx.raw(`SELECT setval('thingful_reviews_id_seq', 0)`),
+  // ])
+//  )
 }
 
 function seedUsers(db, users){
-  const pepperedUsers = users.map(user => ({
+  const preppedUsers = users.map(user => ({
     ...user,
     password:bcrypt.hashSync(user.password, 1)
   }))
@@ -270,7 +270,7 @@ function seedThingsTables(db, users, things, reviews=[]) {
       [things[things.length - 1].id],
     )
      // only insert comments if there are some, also update the sequence counter
-     if (comments.length) {
+     if (reviews.length) {
       await trx.into('thingful_reviews').insert(reviews)
       await trx.raw(
         `SELECT setval('thingful_reviews_id_seq', ?)`,
